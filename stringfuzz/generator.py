@@ -1,6 +1,6 @@
 import re
 
-from stringfuzz.constants import SMT_20, SMT_20_STRING, SMT_25_STRING
+from stringfuzz.constants import SMT_20, SMT_20_STRING, SMT_25_STRING, SMT_26_STRING
 from stringfuzz.scanner import scan, ALPHABET, WHITESPACE
 from stringfuzz.ast import *
 
@@ -24,6 +24,8 @@ def encode_char(c, language):
     if c == '"':
         if language == SMT_25_STRING:
             return '""'
+        elif language == SMT_26_STRING:
+            return '\\u{:0>4x}'.format(ord(c))
         else:
             return '\\"'
     elif c == '\\':
@@ -31,7 +33,7 @@ def encode_char(c, language):
     elif c in WHITESPACE:
         return repr(c)
     elif needs_encoding(c):
-        return '\\x{:0>2x}'.format(ord(c))
+        return '\\u{:0>4x}'.format(ord(c))
     return c
 
 def encode_string(s, language):
@@ -69,7 +71,7 @@ def generate_node(node, language):
         return node.value
 
     if isinstance(node, ReAllCharNode):
-        if language == SMT_25_STRING:
+        if language == SMT_25_STRING or language == SMT_26_STRING:
             return 're.allchar'
         else:
             raise NotSupported(node, language)
@@ -101,7 +103,7 @@ def generate_expr(e, language):
     if isinstance(e, ConcatNode):
         if language == SMT_20_STRING:
             components.append('Concat')
-        elif language == SMT_25_STRING:
+        elif language == SMT_25_STRING or language == SMT_26_STRING:
             components.append('str.++')
         else:
             raise NotSupported(e, language)
@@ -109,7 +111,7 @@ def generate_expr(e, language):
     elif isinstance(e, ContainsNode):
         if language == SMT_20_STRING:
             components.append('Contains')
-        elif language == SMT_25_STRING:
+        elif language == SMT_25_STRING or language == SMT_26_STRING:
             components.append('str.contains')
         else:
             raise NotSupported(e, language)
@@ -117,7 +119,7 @@ def generate_expr(e, language):
     elif isinstance(e, AtNode):
         if language == SMT_20_STRING:
             components.append('CharAt')
-        elif language == SMT_25_STRING:
+        elif language == SMT_25_STRING or language == SMT_26_STRING:
             components.append('str.at')
         else:
             raise NotSupported(e, language)
@@ -125,7 +127,7 @@ def generate_expr(e, language):
     elif isinstance(e, LengthNode):
         if language == SMT_20_STRING:
             components.append('Length')
-        elif language == SMT_25_STRING:
+        elif language == SMT_25_STRING or language == SMT_26_STRING:
             components.append('str.len')
         else:
             raise NotSupported(e, language)
@@ -133,7 +135,7 @@ def generate_expr(e, language):
     elif isinstance(e, IndexOfNode):
         if language == SMT_20_STRING:
             components.append('IndexOf')
-        elif language == SMT_25_STRING:
+        elif language == SMT_25_STRING or language == SMT_26_STRING:
             components.append('str.indexof')
         else:
             raise NotSupported(e, language)
@@ -141,7 +143,7 @@ def generate_expr(e, language):
     elif isinstance(e, IndexOf2Node):
         if language == SMT_20_STRING:
             components.append('IndexOf2')
-        elif language == SMT_25_STRING:
+        elif language == SMT_25_STRING or language == SMT_26_STRING:
             components.append('str.indexof')
         else:
             raise NotSupported(e, language)
@@ -149,7 +151,7 @@ def generate_expr(e, language):
     elif isinstance(e, PrefixOfNode):
         if language == SMT_20_STRING:
             components.append('StartsWith')
-        elif language == SMT_25_STRING:
+        elif language == SMT_25_STRING or language == SMT_26_STRING:
             components.append('str.prefixof')
         else:
             raise NotSupported(e, language)
@@ -157,7 +159,7 @@ def generate_expr(e, language):
     elif isinstance(e, SuffixOfNode):
         if language == SMT_20_STRING:
             components.append('EndsWith')
-        elif language == SMT_25_STRING:
+        elif language == SMT_25_STRING or language == SMT_26_STRING:
             components.append('str.suffixof')
         else:
             raise NotSupported(e, language)
@@ -165,7 +167,7 @@ def generate_expr(e, language):
     elif isinstance(e, StringReplaceNode):
         if language == SMT_20_STRING:
             components.append('Replace')
-        elif language == SMT_25_STRING:
+        elif language == SMT_25_STRING or language == SMT_26_STRING:
             components.append('str.replace')
         else:
             raise NotSupported(e, language)
@@ -173,7 +175,7 @@ def generate_expr(e, language):
     elif isinstance(e, SubstringNode):
         if language == SMT_20_STRING:
             components.append('Substring')
-        elif language == SMT_25_STRING:
+        elif language == SMT_25_STRING or language == SMT_26_STRING:
             components.append('str.substr')
         else:
             raise NotSupported(e, language)
@@ -181,12 +183,16 @@ def generate_expr(e, language):
     elif isinstance(e, FromIntNode):
         if language == SMT_25_STRING:
             components.append('str.from.int')
+        elif language == SMT_26_STRING:
+            components.append('str.from_int')
         else:
             raise NotSupported(e, language)
 
     elif isinstance(e, ToIntNode):
         if language == SMT_25_STRING:
             components.append('str.to.int')
+        elif language == SMT_26_STRING:
+            components.append('str.to_int')
         else:
             raise NotSupported(e, language)
 
@@ -195,6 +201,8 @@ def generate_expr(e, language):
             components.append('Str2Reg')
         elif language == SMT_25_STRING:
             components.append('str.to.re')
+        elif language == SMT_26_STRING:
+            components.append('str.to_re')
         else:
             raise NotSupported(e, language)
 
@@ -203,13 +211,15 @@ def generate_expr(e, language):
             components.append('RegexIn')
         elif language == SMT_25_STRING:
             components.append('str.in.re')
+        elif language == SMT_26_STRING:
+            components.append('str.in_re')
         else:
             raise NotSupported(e, language)
 
     elif isinstance(e, ReConcatNode):
         if language == SMT_20_STRING:
             components.append('RegexConcat')
-        elif language == SMT_25_STRING:
+        elif language == SMT_25_STRING or language == SMT_26_STRING:
             components.append('re.++')
         else:
             raise NotSupported(e, language)
@@ -217,7 +227,7 @@ def generate_expr(e, language):
     elif isinstance(e, ReStarNode):
         if language == SMT_20_STRING:
             components.append('RegexStar')
-        elif language == SMT_25_STRING:
+        elif language == SMT_25_STRING or language == SMT_26_STRING:
             components.append('re.*')
         else:
             raise NotSupported(e, language)
@@ -225,23 +235,21 @@ def generate_expr(e, language):
     elif isinstance(e, RePlusNode):
         if language == SMT_20_STRING:
             components.append('RegexPlus')
-        elif language == SMT_25_STRING:
+        elif language == SMT_25_STRING or language == SMT_26_STRING:
             components.append('re.+')
         else:
             raise NotSupported(e, language)
     
     elif isinstance(e, ReCountNode):
-        if language == SMT_20_STRING:
-            components.append('RegexCount')
-        elif language == SMT_25_STRING:
-            components.append(f'(_ re.loop {e._lower, e._upper})')
+        if language == SMT_26_STRING:
+            components.append(f'(_ re.loop {e._lower} {e._upper})')
         else:
             raise NotSupported(e, language)
 
     elif isinstance(e, ReRangeNode):
         if language == SMT_20_STRING:
             components.append('RegexCharRange')
-        elif language == SMT_25_STRING:
+        elif language == SMT_25_STRING or language == SMT_26_STRING:
             components.append('re.range')
         else:
             raise NotSupported(e, language)
@@ -249,13 +257,13 @@ def generate_expr(e, language):
     elif isinstance(e, ReUnionNode):
         if language == SMT_20_STRING:
             components.append('RegexUnion')
-        elif language == SMT_25_STRING:
+        elif language == SMT_25_STRING or language == SMT_26_STRING:
             components.append('re.union')
         else:
             raise NotSupported(e, language)
 
     elif isinstance(e, ReInterNode):
-        if language == SMT_25_STRING:
+        if language == SMT_25_STRING or language == SMT_26_STRING:
             components.append('re.inter')
         else:
             raise NotSupported(e, language)

@@ -8,7 +8,7 @@ import sys
 import argparse
 import random
 
-from stringfuzz.constants import LANGUAGES, SMT_20_STRING, SMT_25_STRING
+from stringfuzz.constants import LANGUAGES, SMT_20_STRING, SMT_25_STRING, SMT_26_STRING
 from stringfuzz.parser import parse
 from stringfuzz.generator import generate
 from stringfuzz.smt import smt_get_model, smt_string_logic
@@ -85,6 +85,8 @@ DEFAULT_NUM_REGEXES     = 1
 DEFAULT_REGEX_LIT_MIN   = 1
 DEFAULT_REGEX_LIT_MAX   = 3
 DEFAULT_TERM_DEPTH      = 0
+DEFAULT_REGEX_COUNT_MIN = 0
+DEFAULT_REGEX_COUNT_MAX = 10
 DEFAULT_REGEX_VAR_MIN   = None
 DEFAULT_REGEX_VAR_MAX   = None
 DEFAULT_OPERATORS       = OPERATOR_STAR + OPERATOR_PLUS + OPERATOR_UNION
@@ -111,8 +113,8 @@ def main():
         dest    = 'language',
         type    = str,
         choices = LANGUAGES,
-        default = SMT_25_STRING,
-        help    = 'output language (default: {})'.format(SMT_25_STRING)
+        default = SMT_26_STRING,
+        help    = 'output language (default: {})'.format(SMT_26_STRING)
     )
     global_parser.add_argument(
         '--models',
@@ -395,6 +397,24 @@ def main():
         type    = int,
         default = DEFAULT_REGEX_LIT_MAX,
         help    = 'max length of regex terms (default: {})'.format(DEFAULT_REGEX_LIT_MAX)
+    )
+    regex_parser.add_argument(
+        '--count-min',
+        '-l',
+        dest    = 'count_min',
+        metavar = 'N',
+        type    = int,
+        default = DEFAULT_REGEX_COUNT_MIN,
+        help    = 'min count of terms (default: {})'.format(DEFAULT_REGEX_COUNT_MIN)
+    )
+    regex_parser.add_argument(
+        '--count-max',
+        '-u',
+        dest    = 'count_max',
+        metavar = 'N',
+        type    = int,
+        default = DEFAULT_REGEX_COUNT_MAX,
+        help    = 'max count of terms (default: {})'.format(DEFAULT_REGEX_COUNT_MAX)
     )
     regex_parser.add_argument(
         '--depth',

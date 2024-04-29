@@ -134,7 +134,9 @@ def make_random_term(depth, operator_index):
         return smt_regex_concat(subterm, second_subterm)
     
     if operator == OPERATOR_COUNT:
-        return smt_regex_count(subterm, 1, 3)
+        count_lower = random.randint(_count_min, _count_max)
+        count_upper = random.randint(count_lower, _count_max)
+        return smt_regex_count(subterm, count_lower, count_upper)
 
 def make_random_terms(num_terms, depth):
     if _operator_type == OPERATOR_ALTERNATING:
@@ -190,6 +192,8 @@ def make_regex(
     reset_alphabet,
     max_var_length,
     min_var_length,
+    count_min,
+    count_max,
     operators,
     operator_type,
 ):
@@ -238,6 +242,8 @@ def make_regex(
     global _current_membership
     global _literal_min
     global _literal_max
+    global _count_min
+    global _count_max
     global _operator_list
     global _operator_type
 
@@ -247,6 +253,8 @@ def make_regex(
     _current_membership    = _configured_membership
     _literal_min           = literal_min
     _literal_max           = literal_max
+    _count_min             = count_min
+    _count_max             = count_max
     _operator_list         = []
     _operator_type         = operator_type
 

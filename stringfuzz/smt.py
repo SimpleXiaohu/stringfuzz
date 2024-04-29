@@ -173,4 +173,4 @@ def smt_is_unsat():
     return _smt_status('unsat')
 
 def smt_string_logic():
-    return MetaCommandNode(IdentifierNode('set-logic'), IdentifierNode('QF_S'))
+    return MetaCommandNode(IdentifierNode('set-logic'), IdentifierNode('QF_SLIA'))
