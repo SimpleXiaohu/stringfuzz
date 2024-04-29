@@ -58,6 +58,7 @@ __all__ = [
     'StrToReNode',
     'ReConcatNode',
     'ReStarNode',
+    'ReCountNode',
     'RePlusNode',
     'ReRangeNode',
     'ReUnionNode',
@@ -432,6 +433,18 @@ class ReStarNode(_UnaryExpression):
     _signature = [REGEX_SORT]
     _sort      = REGEX_SORT
     _symbol    = 'ReStar'
+
+class ReCountNode(_UnaryExpression):
+    _signature = [REGEX_SORT]
+    _sort      = REGEX_SORT
+    _symbol    = 'ReCount' 
+    _lower     = 0
+    _upper     = 100
+
+    def __init__(self, a, lower, upper):
+        super().__init__(a)
+        self._lower = lower
+        self._upper = upper
 
 class RePlusNode(_UnaryExpression):
     _signature = [REGEX_SORT]

@@ -229,6 +229,14 @@ def generate_expr(e, language):
             components.append('re.+')
         else:
             raise NotSupported(e, language)
+    
+    elif isinstance(e, ReCountNode):
+        if language == SMT_20_STRING:
+            components.append('RegexCount')
+        elif language == SMT_25_STRING:
+            components.append(f'(_ re.loop {e._lower, e._upper})')
+        else:
+            raise NotSupported(e, language)
 
     elif isinstance(e, ReRangeNode):
         if language == SMT_20_STRING:

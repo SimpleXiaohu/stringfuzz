@@ -18,6 +18,7 @@ __all__ = [
     'OPERATOR_UNION',
     'OPERATOR_INTER',
     'OPERATOR_CONCAT',
+    'OPERATOR_COUNT',
     'OPERATOR_ALTERNATING',
     'OPERATOR_RANDOM',
 ]
@@ -48,6 +49,7 @@ OPERATOR_PLUS   = 'p'
 OPERATOR_UNION  = 'u'
 OPERATOR_INTER  = 'i'
 OPERATOR_CONCAT = 'c'
+OPERATOR_COUNT  = 't'
 
 OPERATOR_LIST = [
     OPERATOR_STAR,
@@ -55,6 +57,7 @@ OPERATOR_LIST = [
     OPERATOR_UNION,
     OPERATOR_INTER,
     OPERATOR_CONCAT,
+    OPERATOR_COUNT,
 ]
 
 OPERATOR_ALTERNATING = 'alternating'
@@ -129,6 +132,9 @@ def make_random_term(depth, operator_index):
     if operator == OPERATOR_CONCAT:
         second_subterm = make_random_term(depth - 1, next_operator_index)
         return smt_regex_concat(subterm, second_subterm)
+    
+    if operator == OPERATOR_COUNT:
+        return smt_regex_count(subterm, 1, 3)
 
 def make_random_terms(num_terms, depth):
     if _operator_type == OPERATOR_ALTERNATING:
