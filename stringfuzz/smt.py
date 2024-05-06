@@ -12,6 +12,8 @@ __all__ = [
     'smt_str_lit',
     'smt_int_lit',
     'smt_bool_lit',
+    'smt_regex_allchar',
+    'smt_regex_all',
     'smt_assert',
     'smt_equal',
     'smt_gt',
@@ -85,6 +87,12 @@ def smt_int_lit(value):
 
 def smt_bool_lit(value):
     return BoolLitNode(value)
+
+def smt_regex_allchar():
+    return ReAllCharNode()
+
+def smt_regex_all():
+    return smt_regex_star(smt_regex_allchar())
 
 # node expressions
 def smt_and(a, b):

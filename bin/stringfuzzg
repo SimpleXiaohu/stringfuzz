@@ -87,6 +87,7 @@ DEFAULT_REGEX_LIT_MAX   = 3
 DEFAULT_TERM_DEPTH      = 0
 DEFAULT_REGEX_COUNT_MIN = 0
 DEFAULT_REGEX_COUNT_MAX = 10
+DEFAULT_REGEX_COUNT_DEP = False
 DEFAULT_REGEX_VAR_MIN   = None
 DEFAULT_REGEX_VAR_MAX   = None
 DEFAULT_OPERATORS       = OPERATOR_STAR + OPERATOR_PLUS + OPERATOR_UNION
@@ -399,22 +400,30 @@ def main():
         help    = 'max length of regex terms (default: {})'.format(DEFAULT_REGEX_LIT_MAX)
     )
     regex_parser.add_argument(
-        '--count-min',
+        '--count-min-upper',
         '-l',
-        dest    = 'count_min',
+        dest    = 'count_min_upper',
         metavar = 'N',
         type    = int,
         default = DEFAULT_REGEX_COUNT_MIN,
-        help    = 'min count of terms (default: {})'.format(DEFAULT_REGEX_COUNT_MIN)
+        help    = 'upper bound of min repeat times in count (default: {}) (lower bound is set to 0)'.format(DEFAULT_REGEX_COUNT_MIN)
     )
     regex_parser.add_argument(
-        '--count-max',
+        '--count-max-upper',
         '-u',
-        dest    = 'count_max',
+        dest    = 'count_max_upper',
         metavar = 'N',
         type    = int,
         default = DEFAULT_REGEX_COUNT_MAX,
-        help    = 'max count of terms (default: {})'.format(DEFAULT_REGEX_COUNT_MAX)
+        help    = 'upper bound of max repeat times in count (default: {}) (lower bound is the upper bound of min repeat times)'.format(DEFAULT_REGEX_COUNT_MAX)
+    )
+    regex_parser.add_argument(
+        '--count-dep-larger',
+        '-D',
+        dest    = 'count_dep_larger',
+        action  = 'store_true',
+        default = DEFAULT_REGEX_COUNT_DEP,
+        help    = 'use larger bounds for deeper count operators (default: {})'.format(DEFAULT_REGEX_COUNT_DEP)
     )
     regex_parser.add_argument(
         '--depth',

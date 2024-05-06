@@ -122,20 +122,28 @@ def make_random_term(depth, operator_index):
         return smt_regex_plus(subterm)
 
     if operator == OPERATOR_UNION:
-        second_subterm = make_random_term(depth - 1, next_operator_index)
-        return smt_regex_union(subterm, second_subterm)
+        # second_subterm = make_random_term(depth - 1, next_operator_index)
+        # return smt_regex_union(subterm, second_subterm)
+        terms = [make_random_term(depth - 1, next_operator_index) for i in range(_num_terms)]
+        return join_terms_with(terms, smt_regex_union)
 
     if operator == OPERATOR_INTER:
-        second_subterm = make_random_term(depth - 1, next_operator_index)
-        return smt_regex_inter(subterm, second_subterm)
+        # second_subterm = make_random_term(depth - 1, next_operator_index)
+        # return smt_regex_inter(subterm, second_subterm)
+        terms = [make_random_term(depth - 1, next_operator_index) for i in range(_num_terms)]
+        return join_terms_with(terms, smt_regex_inter)
 
     if operator == OPERATOR_CONCAT:
-        second_subterm = make_random_term(depth - 1, next_operator_index)
-        return smt_regex_concat(subterm, second_subterm)
+        # second_subterm = make_random_term(depth - 1, next_operator_index)
+        # return smt_regex_concat(subterm, second_subterm)
+        terms = [make_random_term(depth - 1, next_operator_index) for i in range(_num_terms)]    
+        return join_terms_with(terms, smt_regex_concat)
     
     if operator == OPERATOR_COUNT:
-        count_lower = random.randint(_count_min, _count_max)
-        count_upper = random.randint(count_lower, _count_max)
+        count_lower = int(random.randint(0, _count_min_upper)/depth) if _count_dep_larger \
+            else int(random.randint(0, _count_min_upper))
+        count_upper = int(random.randint(_count_min_upper, _count_max_upper)/depth) if _count_dep_larger \
+            else int(random.randint(_count_min_upper, _count_max_upper))
         return smt_regex_count(subterm, count_lower, count_upper)
 
 def make_random_terms(num_terms, depth):
@@ -192,8 +200,9 @@ def make_regex(
     reset_alphabet,
     max_var_length,
     min_var_length,
-    count_min,
-    count_max,
+    count_min_upper,
+    count_max_upper,
+    count_dep_larger,
     operators,
     operator_type,
 ):
@@ -242,10 +251,12 @@ def make_regex(
     global _current_membership
     global _literal_min
     global _literal_max
-    global _count_min
-    global _count_max
+    global _count_min_upper
+    global _count_max_upper
+    global _count_dep_larger
     global _operator_list
     global _operator_type
+    global _num_terms
 
     _cursor                = 0
     _literal_type          = literal_type
@@ -253,10 +264,12 @@ def make_regex(
     _current_membership    = _configured_membership
     _literal_min           = literal_min
     _literal_max           = literal_max
-    _count_min             = count_min
-    _count_max             = count_max
+    _count_min_upper       = count_min_upper
+    _count_max_upper       = count_max_upper
+    _count_dep_larger      = count_dep_larger
     _operator_list         = []
     _operator_type         = operator_type
+    _num_terms             = num_terms
 
     # parse operator list in order, in case user wants a custom alternation order
     for c in operators:
@@ -282,6 +295,12 @@ def make_regex(
     for r in regexes:
         constraint = make_constraint(matched, r)
         expressions.append(smt_assert(constraint))
+    
+    # add constraint to sanitize danger characters:  < > ' " &
+    sanitized_regex = join_terms_with([smt_str_to_re(smt_str_lit(c)) for c in ['<', '>', '\'', '"', '&']], smt_regex_union)
+    sanitized_regex = join_terms_with([smt_regex_all(), sanitized_regex, smt_regex_all()], smt_regex_concat)
+    sanitized_constraint = smt_not(smt_regex_in(matched, sanitized_regex))
+    expressions.append(smt_assert(sanitized_constraint))
 
     # create length constraints if required
     if min_var_length is not None:
