@@ -21,9 +21,9 @@ Running
 
 Without installing, the scripts can be run from the repository root as follows:
 
-    ./bin/stringfuzzg --help
-    ./bin/stringfuzzx --help
-    ./bin/stringstats --help
+    python3 ./bin/stringfuzzg --help
+    python3 ./bin/stringfuzzx --help
+    python3 ./bin/stringstats --help
 
 If installed, they can be run from anywhere as follows:
 
@@ -36,12 +36,12 @@ Examples
 
 To create a problem with concats nested 100 levels deep:
 
-    ./bin/stringfuzzg concats --depth 100
+    python3 ./bin/stringfuzzg concats --depth 100
 
 To create the above problem and replace all characters with unprintable ones:
 
-    ./bin/stringfuzzg concats --depth 100 | ./bin/stringfuzzx unprintable
+    python3 ./bin/stringfuzzg concats --depth 100 | python3 ./bin/stringfuzzx unprintable
 
 To create and immediately feed a problem to Z3str3:
 
-    ./bin/stringfuzzg concats --depth 100 | z3str3 -in
+    python3 ./bin/stringfuzzg concats --depth 100 | z3str3 -in
